@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// one column with array of chars
 type column struct {
 	crates []uint8
 }
@@ -24,9 +25,32 @@ func retype_arr(arr []string) []int {
 	return new_arr
 }
 
+func parser_crates(line string, arr []column) {
+	crate_num := 0
+	backspc := 0
+	line = strings.Replace(line, "[", "", -1)
+	line = strings.Replace(line, "]", "", -1)
+	for i := range line {
+		if line[i] == ' ' {
+			backspc++
+		} else {
+			arr[crate_num].crates = append(arr[crate_num].crates, line[i])
+			crate_num++
+			backspc = 0
+			continue
+		}
+		if backspc == 4 {
+			crate_num++
+			backspc = 0
+			continue
+		}
+	}
+}
+
 func part1() {
 	var file, err = os.OpenFile("input.txt", os.O_RDONLY, 0644)
 	var columns []column
+	//init
 	for i := 0; i < 9; i++ {
 		columns = append(columns, column{[]uint8{}})
 	}
@@ -37,31 +61,13 @@ func part1() {
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		crate_num := 0
+
 		line := scanner.Text()
 		if len(line) == 0 || line[1] == '1' {
 			continue
 		}
 		if !(strings.Contains(line, "move")) {
-			backspc := 0
-			line = strings.Replace(line, "[", "", -1)
-			line = strings.Replace(line, "]", "", -1)
-			for i := range line {
-				if line[i] == ' ' {
-					backspc++
-				} else {
-					columns[crate_num].crates = append(columns[crate_num].crates, line[i])
-					crate_num++
-					backspc = 0
-					continue
-				}
-				if backspc == 4 {
-					crate_num++
-					backspc = 0
-					continue
-				}
-
-			}
+			parser_crates(line, columns)
 			continue
 		}
 		line = strings.Replace(line, "move ", "", -1)
@@ -82,6 +88,7 @@ func part1() {
 func part2() {
 	var file, err = os.OpenFile("input.txt", os.O_RDONLY, 0644)
 	var columns []column
+	// init
 	for i := 0; i < 9; i++ {
 		columns = append(columns, column{[]uint8{}})
 	}
@@ -92,31 +99,12 @@ func part2() {
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		crate_num := 0
 		line := scanner.Text()
 		if len(line) == 0 || line[1] == '1' {
 			continue
 		}
 		if !(strings.Contains(line, "move")) {
-			backspc := 0
-			line = strings.Replace(line, "[", "", -1)
-			line = strings.Replace(line, "]", "", -1)
-			for i := range line {
-				if line[i] == ' ' {
-					backspc++
-				} else {
-					columns[crate_num].crates = append(columns[crate_num].crates, line[i])
-					crate_num++
-					backspc = 0
-					continue
-				}
-				if backspc == 4 {
-					crate_num++
-					backspc = 0
-					continue
-				}
-
-			}
+			parser_crates(line, columns)
 			continue
 		}
 		line = strings.Replace(line, "move ", "", -1)
